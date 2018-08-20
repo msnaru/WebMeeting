@@ -1,0 +1,95 @@
+<!-- index_chat.html -->
+
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatapp</title>
+    <style>
+        .name{
+            font-size: 10px;
+        }
+        .text{
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div>
+    <div>
+        <input type="text" id="username">
+    </div>
+    <div>
+        <textarea id="text" rows="5"></textarea>
+        <button id="send">send</button>
+    </div>
+    <div id="output"></div>
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/5.4.0/firebase.js"></script>
+<script>
+    // import apikey
+    function getJSON() {
+        var req = new XMLHttpRequest();                     // XMLHttpRequest オブジェクトを生成する
+        req.onreadystatechange = function() {               // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+            if(req.readyState == 4 && req.status == 200){   // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+                var json_data = JSON.parse(req.responseText);    // 取得した JSON ファイルの中身を変数へ格納
+            }
+        };
+        req.open("GET", "key.json", false);              // HTTPメソッドとアクセスするサーバーのURLを指定
+        req.send(null);                                     // 実際にサーバーへリクエストを送信
+        return json_data;
+    }
+
+    var import_data=getJSON();
+    var key_firebase = import_data["webmeeting_key"];
+
+    // Initialize Firebase
+    var config = {
+        apiKey: key_firebase,
+        authDomain: "webmeeting-599ae.firebaseapp.com",
+        databaseURL: "https://webmeeting-599ae.firebaseio.com",
+        projectId: "webmeeting-599ae",
+        storageBucket: "webmeeting-599ae.appspot.com",
+        messagingSenderId: "538616861505"
+    };
+    firebase.initializeApp(config);
+
+    //準備
+    const newPostRef = firebase.database();
+    let room = "room1";
+
+    const send = documnet.getElementById("send");
+    const username = document.getElementById("username");
+    const text = document.getElementById("text")
+    const output = document.getElementById("output")
+
+    //Msg送信処理
+    send.addEventLinstener('click', function(){
+        newPostRef(room).push({
+            username: username.value,
+            text: text.value
+        });
+        text.value = "";
+    });
+
+    //Msg受信処理
+    newPostRef.ref(room).on("child_added",function(data){
+        const v = data.val(); //データ取得
+        const k = data.key;   //ユニークkey取得
+        let str ="";
+
+        str += '<div class="name">' + v.username + '</div>';
+        str += '<div class="text">' + v.text + '</div>';
+        
+        output.innerHTML += str;
+
+    });
+
+</script>
+</body>
+</html>
