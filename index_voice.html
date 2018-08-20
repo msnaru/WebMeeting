@@ -23,8 +23,13 @@
     
     speech.addEventListener('result', function(e){
         console.log(e);
+
+        // 音声をhtmlに表示
+        const text = e.results[0][0].transcript;
+        content.innerText = text;
     });
     
+
     </script>
   </body>
 </html>
